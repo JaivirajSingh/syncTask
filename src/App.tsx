@@ -1,14 +1,9 @@
-import TaskDisplay from "./TaskDisplay"
-import AddTask from "./AddTask"
-import { useState } from "react"
+import TodoList from "./TodoList"
 
-export default function App() {
-    const [tasks, setTasks] = useState<string[]>([])
-    
+export default function App() {    
     return (
         <>
-            <TaskDisplay tasks={tasks}/>
-            <AddTask setTasks={setTasks}/>
+            <TodoList />            
         </>
     )
 }
