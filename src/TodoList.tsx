@@ -6,7 +6,7 @@ export default function TodoList() {
     // Maps over the array of tasks
     const taskList = tasks.map((task, index) => (           
             <li key={index}>
-                <input className="bg-white" type="checkbox" />    
+                <input onChange={() => deleteTask(index)} className="bg-white" type="checkbox" />    
                 {task}
             </li>
     ))
@@ -14,6 +14,11 @@ export default function TodoList() {
     function addTask(formData: FormData) {
         const newTask = formData.get("task") as string
         setTasks((prevTasks: string[]) => [...prevTasks, newTask])
+    }
+
+    function deleteTask(index: number) {
+        const updatedList = tasks.filter((_, i) => i !== index)
+        setTasks(updatedList)
     }
 
     return (
