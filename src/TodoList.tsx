@@ -13,7 +13,10 @@ export default function TodoList() {
 
     function addTask(formData: FormData) {
         const newTask = formData.get("task") as string
-        setTasks((prevTasks: string[]) => [...prevTasks, newTask])
+
+        if (newTask.trim() !== "") {
+            setTasks((prevTasks: string[]) => [...prevTasks, newTask])   
+        }
     }
 
     function deleteTask(index: number) {
