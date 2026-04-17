@@ -1,23 +1,82 @@
-import { useState } from "react"
+import { useState, useEffect, useActionState } from "react"
+import supabase from "./supabase-client"
 
-export default function TodoList() {
-    const [tasks, setTasks] = useState<string[]>([])
+interface Task {
+    title: string
+}
 
-    // Maps over the array of tasks
-    const taskList = tasks.map((task, index) => (           
-            <li key={index}>
-                <input onChange={() => deleteTask(index)} className="bg-white" type="checkbox" />    
-                {task}
-            </li>
-    ))
+export default function TodoList() {    
+    const [tasks, setTasks] = useState<Task[]>([])
 
-    function addTask(formData: FormData) {
-        const newTask = formData.get("task") as string
+    // Supabase code
+    useEffect(() => {
+        fetchTasks()
 
-        if (newTask.trim() !== "") {
-            setTasks((prevTasks: string[]) => [...prevTasks, newTask])   
+        const channel = supabase
+        .channel('deal-changes')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'tasks'
+            },
+            (_) => {
+                fetchTasks()
+            })
+        .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [])
+
+    async function fetchTasks() {
+        try {
+            const {data, error} = await supabase
+            .from('tasks')
+            .select(
+                `
+                title
+                `
+            )
+        if (error) {
+            throw error;
+        }
+        setTasks(data)
+        } catch (error) {
+            console.error('Error fetching metrics', error)
         }
     }
+
+    // Pushes new task to local state and supabase 
+    const [taskState, submitTask, isPending] = useActionState(
+        async (_, formData: FormData) => {
+
+            const newTask = {
+                title: formData.get('task-title') as string
+            }
+            setTasks(prevTasks => [...prevTasks, {title: newTask.title}])   
+
+            const { error } = await supabase.from('tasks').insert(newTask)
+        
+            if (error) {
+                console.error('Error adding task: ', error.message)
+                return new Error('Failed to add task')
+            }
+
+            return null
+        },
+        null
+    )
+
+    // Maps over the array of tasks
+    const taskList = tasks.map((task, index) => (    
+            <li key={index}>
+                <input onChange={() => deleteTask(index)} className="bg-white" type="checkbox" />    
+                {task.title}
+            </li>
+    ))
 
     function deleteTask(index: number) {
         const updatedList = tasks.filter((_, i) => i !== index)
@@ -31,9 +90,9 @@ export default function TodoList() {
             </div>
 
             {/* Add task form */}
-            <form action={addTask}>
-                <input className="bg-white" type="text" name="task" required/>
-                <button className="bg-white">Add task</button>
+            <form action={submitTask}>
+                <input className="bg-white" type="text" name="task-title" required/>
+                <button disabled={isPending} className="bg-white">Add task</button>
             </form>
         </>    
     )
