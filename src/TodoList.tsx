@@ -43,7 +43,9 @@ export default function TodoList() {
         if (error) {
             throw error;
         }
+
         setTasks(data)
+        
         } catch (error) {
             console.error('Error fetching metrics', error)
         }
@@ -56,7 +58,6 @@ export default function TodoList() {
             const newTask = {
                 title: formData.get('task-title') as string
             }
-            setTasks(prevTasks => [...prevTasks, {title: newTask.title}])   
 
             const { error } = await supabase.from('tasks').insert(newTask)
         
