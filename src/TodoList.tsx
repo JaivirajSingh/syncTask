@@ -1,8 +1,10 @@
-import { useState, useEffect, useActionState } from "react"
+import { useState, useEffect } from "react"
 import supabase from "./supabase-client"
+import { useActionState } from "react"
 
 interface Task {
     title: string
+    uuid: string
 }
 
 export default function TodoList() {    
@@ -13,7 +15,7 @@ export default function TodoList() {
         fetchTasks()
 
         const channel = supabase
-        .channel('deal-changes')
+        .channel('task-changes')
         .on(
             'postgres_changes',
             {
@@ -37,14 +39,15 @@ export default function TodoList() {
             .from('tasks')
             .select(
                 `
-                title
+                title,
+                uuid
                 `
             )
         if (error) {
             throw error;
         }
 
-        setTasks(data)
+        setTasks(data ?? [])
         
         } catch (error) {
             console.error('Error fetching metrics', error)
@@ -56,7 +59,8 @@ export default function TodoList() {
         async (_, formData: FormData) => {
 
             const newTask = {
-                title: formData.get('task-title') as string
+                title: formData.get('task-title') as string,
+                uuid: crypto.randomUUID() as string
             }
 
             const { error } = await supabase.from('tasks').insert(newTask)
@@ -72,16 +76,15 @@ export default function TodoList() {
     )
 
     // Maps over the array of tasks
-    const taskList = tasks.map((task, index) => (    
-            <li key={index}>
-                <input onChange={() => deleteTask(index)} className="bg-white" type="checkbox" />    
+    const taskList = tasks.map((task) => (    
+            <li key={task.uuid}>
+                <input onChange={() => deleteTask(task.uuid)} className="bg-white" type="checkbox" />    
                 {task.title}
             </li>
     ))
 
-    function deleteTask(index: number) {
-        const updatedList = tasks.filter((_, i) => i !== index)
-        setTasks(updatedList)
+    async function deleteTask(uuid: string) {
+        const { error } = await supabase.from('tasks').delete().eq('uuid', uuid)
     }
 
     return (
@@ -92,7 +95,7 @@ export default function TodoList() {
 
             {/* Add task form */}
             <form action={submitTask}>
-                <input className="bg-white" type="text" name="task-title" required/>
+                <input disabled={isPending} className="bg-white" type="text" name="task-title" required/>
                 <button disabled={isPending} className="bg-white">Add task</button>
             </form>
         </>    
