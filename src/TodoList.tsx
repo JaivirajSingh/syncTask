@@ -62,6 +62,9 @@ export default function TodoList() {
                 title: formData.get('task-title') as string,
                 uuid: crypto.randomUUID() as string
             }
+            
+            setTasks(prevTasks => [...prevTasks, {title: newTask.title, uuid: newTask.uuid}])   
+
 
             const { error } = await supabase.from('tasks').insert(newTask)
         
