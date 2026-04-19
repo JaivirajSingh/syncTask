@@ -33,6 +33,7 @@ export default function TodoList() {
         }
     }, [])
 
+    // Fetches all tasks from supabase and updates state
     async function fetchTasks() {
         try {
             const {data, error} = await supabase
@@ -47,14 +48,14 @@ export default function TodoList() {
             throw error;
         }
 
-        setTasks(data ?? [])
+        setTasks(data)
         
         } catch (error) {
             console.error('Error fetching metrics', error)
         }
     }
 
-    // Pushes new task to local state and supabase 
+    // Adds new task to local state and then supabase 
     const [taskState, submitTask, isPending] = useActionState(
         async (_, formData: FormData) => {
 
@@ -62,8 +63,9 @@ export default function TodoList() {
                 title: formData.get('task-title') as string,
                 uuid: crypto.randomUUID() as string
             }
-            
-            setTasks(prevTasks => [...prevTasks, {title: newTask.title, uuid: newTask.uuid}])   
+
+            // Updates local state before supabase call
+            setTasks(prevTasks => [...prevTasks, newTask])   
 
 
             const { error } = await supabase.from('tasks').insert(newTask)
@@ -78,6 +80,11 @@ export default function TodoList() {
         null
     )
 
+    async function deleteTask(uuid: string) {
+        setTasks(prevTasks => prevTasks.filter(task => task.uuid !== uuid))
+        const { error } = await supabase.from('tasks').delete().eq('uuid', uuid)
+    }
+
     // Maps over the array of tasks
     const taskList = tasks.map((task) => (    
             <li key={task.uuid}>
@@ -85,10 +92,6 @@ export default function TodoList() {
                 {task.title}
             </li>
     ))
-
-    async function deleteTask(uuid: string) {
-        const { error } = await supabase.from('tasks').delete().eq('uuid', uuid)
-    }
 
     return (
         <>
