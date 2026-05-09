@@ -1,11 +1,13 @@
 import { useActionState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useNavigate, Link } from "react-router-dom"
 
 const SignIn = () => {
     const { signInUser } = useAuth()
+    const navigate = useNavigate()
 
     const [error, submitAction, isPending] = useActionState(
-        async (prevState, formData) => {
+        async (_prevState, formData) => {
             const email = formData.get('email')
             const password = formData.get('password')
 
@@ -18,6 +20,7 @@ const SignIn = () => {
             }
 
             if (success && data?.session) {
+                navigate('/TodoList')
                 return null
             }
 
@@ -31,13 +34,17 @@ const SignIn = () => {
             <div>
                 <form action={submitAction}>
                     <h2>Sign In</h2>
-                    <p>Don't have an account yet? Why don't you go fuck yourself</p>
+                    <p> Don't have an account yet? {' '}
+                        <Link to="/SignUp"> 
+                            Why don't you go fuck yourself
+                        </Link>
+                    </p>
                 
                     <label htmlFor="email">Email</label>
-                    <input type="email" name="email" placeholder="" disabled={isPending} required/>
+                    <input id="email" type="email" name="email" disabled={isPending} required/>
 
                     <label htmlFor="password">Password</label>
-                    <input type="password" name="password" placeholder="" disabled={isPending} required/>
+                    <input id="password" type="password" name="password" disabled={isPending} required/>
 
                     <button type="submit">{isPending ? 'Signing In' : 'Sign In'}</button>
 
