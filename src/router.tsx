@@ -1,4 +1,5 @@
 import SignIn from './components/SignIn'
+import SignUp from './components/SignUp';
 import TodoList from './routes/TodoList';
 import { createBrowserRouter } from "react-router-dom";
 
@@ -9,7 +10,11 @@ export const router = createBrowserRouter(
             element: <SignIn />,
         },
         {
-            path: '/Todolist',
+            path: '/SignUp',
+            element: <SignUp />,
+        },
+        {
+            path: '/TodoList',
             element: <TodoList />,
         }
     ]
