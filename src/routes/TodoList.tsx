@@ -56,7 +56,7 @@ export default function TodoList() {
     }
 
     // Adds new task to local state and then supabase 
-    const [taskState, submitTask, isPending] = useActionState(
+    const [_taskState, submitTask, isPending] = useActionState(
         async (_, formData: FormData) => {
 
             const newTask = {
