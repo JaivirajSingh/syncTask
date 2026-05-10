@@ -1,3 +1,4 @@
+import Header from "../components/Header"
 import { useState, useEffect } from "react"
 import supabase from "../supabase-client"
 import { useActionState } from "react"
@@ -95,6 +96,7 @@ export default function TodoList() {
 
     return (
         <>
+            <Header />
             <div className="flex justify-center">
                 <ul>{taskList}</ul>
             </div>
