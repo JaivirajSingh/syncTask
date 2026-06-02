@@ -7,14 +7,12 @@ export default function Header() {
     const navigate = useNavigate()
     const [error, setError] = useState(null)
 
-    const handleSignOut = async (e) => {
-        e.preventDefault()
-
-        const { success, error } = await signOutUser()
-        if (success) {
-            navigate("/")
+    const handleSignOut = async () => {
+        const result = await signOutUser()
+        if (result.success) {
+            navigate("/SignIn")
         } else {
-            setError(error.message)
+            setError(error)
         }
     }
 
