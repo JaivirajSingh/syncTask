@@ -68,7 +68,7 @@ export default function TodoList() {
             // Updates local state before supabase call
             setTasks(prevTasks => [...prevTasks, newTask])   
 
-
+            // Inserts task into supabase
             const { error } = await supabase.from('tasks').insert(newTask)
         
             if (error) {

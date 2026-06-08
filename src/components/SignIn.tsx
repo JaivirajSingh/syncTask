@@ -36,7 +36,7 @@ const SignIn = () => {
                     <h2>Sign In</h2>
                     <p> Don't have an account yet? {' '}
                         <Link to="/SignUp"> 
-                            Why don't you go fuck yourself
+                            Sign Up
                         </Link>
                     </p>
                 
