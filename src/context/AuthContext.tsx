@@ -20,6 +20,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const AuthContextProvider = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
 
+    // Fetches user data from Supabase
     useEffect(() => {
         async function getInitialSession() {
             try {
@@ -40,7 +41,7 @@ const AuthContextProvider = ({ children }) => {
 
         supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session)
-            console.log('session changed aahhhhhh', session)
+            console.log('session changed', session)
         })
 
     }, [])
