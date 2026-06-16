@@ -2,6 +2,7 @@ import SignIn from './components/SignIn'
 import SignUp from './components/SignUp';
 import TodoList from './routes/TodoList';
 import RootRedirect from './routes/RootRedirect';
+import ProtectedRoute from './components/ProtectedRoute';
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter(
@@ -20,7 +21,11 @@ export const router = createBrowserRouter(
         },
         {
             path: '/TodoList',
-            element: <TodoList />,
+            element: (
+                <ProtectedRoute>
+                    <TodoList />
+                </ProtectedRoute>
+            ),
         }
     ]
 )
