@@ -3,7 +3,7 @@ import supabase from "../supabase-client";
 import type { Session, User } from "@supabase/supabase-js"
 
 type AuthContextType = {
-    session: Session | null;
+    session: Session | null | undefined;
     setSession: React.Dispatch<React.SetStateAction<Session | null>>;
     signInUser: (email: string, password: string) => Promise<
         { success: false; error: string } |
@@ -13,12 +13,16 @@ type AuthContextType = {
         { success: false; error: string } |
         { success: true }
     >;
+    signUpNewUser: (email: string, password: string) => Promise<
+        { success: false; error: string } |
+        { success: true; data: { user: User; session: Session } }
+    >;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthContextProvider = ({ children }) => {
-    const [session, setSession] = useState<Session | null>(null);
+    const [session, setSession] = useState<Session | null | undefined>(undefined);
 
     // Fetches user data from Supabase
     useEffect(() => {
@@ -89,8 +93,32 @@ const AuthContextProvider = ({ children }) => {
         }
     }
 
+    const signUpNewUser = async (email: string, password: string): Promise<
+        { success: false; error: string } |
+        { success: true; data: { user: User; session: Session } }
+    > => {
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: email.toLowerCase(),
+                password: password,
+            })
+              
+            if (error) {
+                    console.error('supabase sign up error', error.message)
+                    return { success: false, error: error.message }
+                }
+
+            console.log('supabase sign up success', data)
+            return { success: true, data }
+            
+            } catch (error) {
+                console.error('Unexpected error during sign up', error)
+                return { success: false, error: 'an unexpected error occured.' }
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ session, setSession, signInUser, signOutUser }}>
+        <AuthContext.Provider value={{ session, setSession, signInUser, signOutUser, signUpNewUser}}>
             {children}
         </AuthContext.Provider>
     )

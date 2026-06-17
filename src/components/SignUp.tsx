@@ -1,16 +1,44 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useActionState } from "react";
 
 const SignUp = () => {
+    const { signUpNewUser } = useAuth()
+    const navigate = useNavigate()
+
+    const [error, submitAction, isPending] = useActionState(
+        async (previousState, formData) => {
+            const email = formData.get('email')
+            const password = formData.get('password')
+
+            const {
+                success, data, error: signUpError
+            } = await signUpNewUser(email, password)
+
+            if (signUpError) {
+                return new Error(signUpError)
+            }
+
+            if (success && data?.session) {
+                navigate('/TodoList')
+                return null
+            }
+
+            return null
+        },
+        null
+    )
+
     return (
         <>
             <div>
-                <form>
+                <form action={submitAction}>
                     <h1>AUTHENTICATION</h1>
                     <h2>Sign up Now</h2>
                     <p>
                         Already have an account?{' '}
                         <Link to={"/"}>
-                            Why don't you fuck yourself
+                            Sign In
                         </Link>
                     </p>
 
@@ -33,11 +61,14 @@ const SignUp = () => {
                     />
 
                     <button type="submit">
-                        Sign Up
-                        {/*'Signing up...' when pending*/}
+                        {isPending ? 'Signing Up. Calm Down' : 'Sign Up'}
                     </button>
 
-                    {/* Error message */}
+                    {error && (
+                        <div role="alert">
+                            {error.message}
+                        </div>
+                    )}
                 </form>
             </div>
         </>
